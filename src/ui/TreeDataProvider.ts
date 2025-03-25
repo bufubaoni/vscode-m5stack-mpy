@@ -55,14 +55,14 @@ export class M5FSResource extends vscode.TreeItem {
     }
 
     this.iconPath = {
-      light: path.join(__filename, '..', '..', 'resources', 'light', this.icon),
-      dark: path.join(__filename, '..', '..', 'resources', 'dark', this.icon),
+      light: vscode.Uri.file(path.join(__filename, '..', '..', 'resources', 'light', this.icon)),
+      dark: vscode.Uri.file(path.join(__filename, '..', '..', 'resources', 'dark', this.icon)),
     };
   }
 }
 
 export class M5TreeDataProvider implements vscode.TreeDataProvider<M5FSResource> {
-  constructor(private coms: string[]) {}
+  constructor(private coms: string[]) { }
 
   getChildren(element?: M5FSResource): Thenable<M5FSResource[]> {
     if (!this.coms.length) {
