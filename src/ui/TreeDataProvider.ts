@@ -102,7 +102,23 @@ export class M5TreeDataProvider implements vscode.TreeDataProvider<M5FSResource>
       }
 
       try {
+        vscode.window.showInformationMessage('init cmd start');
+        // const res = (await SerialManager.initCmd(com)).toString();
+        // vscode.window.showInformationMessage(res);
+        SerialManager.initCmd(com).then((res) => {
+          vscode.window.showErrorMessage('then((res)');
+          vscode.window.showInformationMessage(res.toString());
+        }).catch((e) => {
+          vscode.window.showErrorMessage('comErroMessage');
+          vscode.window.showErrorMessage(e);
+        }).finally(() => {
+          vscode.window.showErrorMessage('finally');
+        });
+        vscode.window.showInformationMessage('init cmd end');
+
         const dir = (await SerialManager.listDir(com, extraPath)).toString();
+        vscode.window.showInformationMessage("const dir = (await SerialManager.listDir(com, extraPath)).toString();");
+        vscode.window.showInformationMessage(dir);
         dir.split(',').forEach((dir) => {
           if (!dir) {
             return [];

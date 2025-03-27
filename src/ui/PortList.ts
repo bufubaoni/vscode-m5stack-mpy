@@ -81,10 +81,10 @@ class PortList {
     this.selectedCOMs = !selected
       ? []
       : selected?.map(({ label, description }) => ({
-          label,
-          description,
-          picked: true,
-        }));
+        label,
+        description,
+        picked: true,
+      }));
 
     this.selectedCOMs.forEach((port) => {
       if (!StatusBar.has(port)) {

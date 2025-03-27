@@ -1,5 +1,6 @@
 import SerialConnection from './SerialConnection';
-import { COMMAND_CODES } from './types';
+import { COMMAND_CODES, MICRO_INTER_CMD } from './types';
+import * as vscode from 'vscode';
 
 type Connections = {
   [key: string]: SerialConnection;
@@ -14,9 +15,11 @@ class SerialManager {
   }
 
   connect(com: string, openedCb: (err: unknown) => void) {
-    console.log('opening connection', com);
-
     this.m5[com] = new SerialConnection(com, openedCb);
+  }
+
+  initCmd(com: string): Promise<Buffer> {
+    return this.m5[com].sendCommand(1, MICRO_INTER_CMD.softRebot.toString(16));
   }
 
   exec(com: string, code: string): Promise<Buffer> {
