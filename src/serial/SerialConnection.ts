@@ -21,7 +21,7 @@ class SerialConnection {
     this.port.on('open', this.onOpen.bind(this));
     this.port.on('data', this.onData.bind(this));
     this.received = Buffer.from([]);
-    this.resolve = () => { vscode.window.showInformationMessage("resolve") };
+    this.resolve = (chuck) => { console.log(chuck) };
     this.reject = () => { vscode.window.showInformationMessage("reject") };
     this.onOpenCb = onOpenCb;
   }
@@ -71,24 +71,10 @@ class SerialConnection {
   }
 
   onData(chunk: Buffer): void {
-    // vscode.window.showInformationMessage("chock", chunk.toString())
+    this.isBusy = true;
     this.received = Buffer.concat([this.received, chunk]);
-    // DOES NOT SEEM TO BE USEFUL CHECK
-    // if (this.received.slice(0, 3).compare(Buffer.from(HEAD_DATA)) !== 0) {
-    //   console.log('[Error] boot start failed.');
-    //   this.reject(comErroMessage);
-    //   return;
-    // }
-    // if (chunk) {
-    vscode.window.showInformationMessage("chock", this.received.toString())
-    // if (chunk) {
-    const buf = this.received.slice(5, -5);
     this.resolve(this.received);
-    // } else {
-    //   this.reject(comErroMessage);
-    // }
     this.isBusy = false;
-    // }
   }
 
   onError(err: any): void {

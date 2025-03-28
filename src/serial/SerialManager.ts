@@ -19,8 +19,13 @@ class SerialManager {
   }
 
   initCmd(com: string): Promise<Buffer> {
-    return this.m5[com].sendCommand(1, MICRO_INTER_CMD.softRebot.toString(16));
+    return this.m5[com].sendCommand(1, MICRO_INTER_CMD.stopCurrent.toString(16));
   }
+
+  rawMode(com: string): Promise<Buffer> {
+    return this.m5[com].sendCommand(1, MICRO_INTER_CMD.setRawRepl.toString(16));
+  }
+
 
   exec(com: string, code: string): Promise<Buffer> {
     return this.m5[com].sendCommand(COMMAND_CODES.exec, code);

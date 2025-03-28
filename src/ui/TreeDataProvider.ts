@@ -1,6 +1,7 @@
 import * as path from 'path';
 import * as vscode from 'vscode';
 import SerialManager from '../serial/SerialManager';
+import { SIG } from '../serial/types';
 
 export const FILE = 'file';
 export const FOLDER = 'folder';
@@ -91,6 +92,29 @@ export class M5TreeDataProvider implements vscode.TreeDataProvider<M5FSResource>
           vscode.TreeItemCollapsibleState.Collapsed
         );
         tree.push(comNode);
+        SerialManager.initCmd(this.coms[i]).then((res) => {
+          vscode.window.showInformationMessage('Connection and init success.');
+          let connect = res.toString()
+          console.log(connect, SIG.logo)
+          if (connect.includes(SIG.logo)) {
+            vscode.window.showInformationMessage('Read connection logo.');
+            SerialManager.rawMode(this.coms[i]).then((res) => {
+              vscode.window.showInformationMessage(res.toString() + 'MicroPython is ready.');
+            }).catch((e) => {
+              vscode.window.showErrorMessage("inner" + e);
+            }).finally(() => {
+              vscode.window.showInformationMessage('Logo init finally');
+            });
+          } else if (connect.includes(SIG.RawReplStr)) {
+            vscode.window.showInformationMessage('MicroPython raw REPL is ready.');
+          } else {
+            vscode.window.showErrorMessage(connect);
+          }
+        }).catch((e) => {
+          vscode.window.showErrorMessage(e);
+        }).finally(() => {
+          vscode.window.showErrorMessage('finally');
+        });
       }
       return tree;
     } else {
@@ -102,20 +126,6 @@ export class M5TreeDataProvider implements vscode.TreeDataProvider<M5FSResource>
       }
 
       try {
-        vscode.window.showInformationMessage('init cmd start');
-        // const res = (await SerialManager.initCmd(com)).toString();
-        // vscode.window.showInformationMessage(res);
-        SerialManager.initCmd(com).then((res) => {
-          vscode.window.showErrorMessage('then((res)');
-          vscode.window.showInformationMessage(res.toString());
-        }).catch((e) => {
-          vscode.window.showErrorMessage('comErroMessage');
-          vscode.window.showErrorMessage(e);
-        }).finally(() => {
-          vscode.window.showErrorMessage('finally');
-        });
-        vscode.window.showInformationMessage('init cmd end');
-
         const dir = (await SerialManager.listDir(com, extraPath)).toString();
         vscode.window.showInformationMessage("const dir = (await SerialManager.listDir(com, extraPath)).toString();");
         vscode.window.showInformationMessage(dir);

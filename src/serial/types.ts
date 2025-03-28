@@ -21,3 +21,8 @@ export const MICRO_INTER_CMD = {
   softRebot: 0x04,
   passMode: 0x05,
 }
+
+export const SIG = {
+  logo: "\\__,_|_|_| |_|\\___/ \\_/\\_/",
+  RawReplStr: ">>>"
+}
