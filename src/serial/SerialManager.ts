@@ -1,6 +1,7 @@
+import { Console } from 'console';
 import SerialConnection from './SerialConnection';
 import { COMMAND_CODES, MICRO_INTER_CMD } from './types';
-import * as vscode from 'vscode';
+import vscode from 'vscode';
 
 type Connections = {
   [key: string]: SerialConnection;
@@ -19,11 +20,11 @@ class SerialManager {
   }
 
   initCmd(com: string): Promise<Buffer> {
-    return this.m5[com].sendCommand(1, MICRO_INTER_CMD.stopCurrent.toString(16));
+    return this.m5[com].sendCommandWithBuffer(Buffer.from([MICRO_INTER_CMD.stopCurrent]));
   }
 
   rawMode(com: string): Promise<Buffer> {
-    return this.m5[com].sendCommand(1, MICRO_INTER_CMD.setRawRepl.toString(16));
+    return this.m5[com].sendCommandWithBuffer(Buffer.from([MICRO_INTER_CMD.setRawRepl]));
   }
 
 
@@ -32,7 +33,24 @@ class SerialManager {
   }
 
   listDir(com: string, dirname: string): Promise<Buffer> {
-    return this.m5[com].sendCommand(COMMAND_CODES.listDir, dirname);
+    this.m5[com].sendCommandWithBuffer(Buffer.from(MICRO_INTER_CMD.setRawRepl.toString(16))).then((res) => {
+      console.log("sendCommandWithBuffer:MICRO_INTER_CMD.setRawRepl:start");
+      console.log(res.toString());
+      console.log("sendCommandWithBuffer:MICRO_INTER_CMD.setRawRepl:end");
+    }).catch((e) => {
+      console.log(e.toString());
+    });;
+    let dir = `import os; files = os.listdir('${dirname}'); print(','.join(files));`
+    console.info(dir);
+    this.m5[com].sendCommandWithBuffer(Buffer.from(dir)).then((res) => {
+      console.log("sendCommandWithBuffer:MICRO_INTER_CMD.dir:start");
+      console.log(res.toString());
+      console.log("sendCommandWithBuffer:MICRO_INTER_CMD.dir:end");
+    }).catch((e) => {
+      console.log(e.toString());
+    });;
+    this.m5[com].sendCommandWithBuffer(Buffer.from(MICRO_INTER_CMD.endCMD.toString(16)));
+    return this.m5[com].sendCommandWithBuffer(Buffer.from([MICRO_INTER_CMD.endCMD]));
   }
 
   isBusy(com: string) {

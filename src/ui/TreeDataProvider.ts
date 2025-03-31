@@ -108,7 +108,7 @@ export class M5TreeDataProvider implements vscode.TreeDataProvider<M5FSResource>
           } else if (connect.includes(SIG.RawReplStr)) {
             vscode.window.showInformationMessage('MicroPython raw REPL is ready.');
           } else {
-            vscode.window.showErrorMessage(connect);
+            vscode.window.showErrorMessage("connect error" + connect);
           }
         }).catch((e) => {
           vscode.window.showErrorMessage(e);
@@ -127,26 +127,46 @@ export class M5TreeDataProvider implements vscode.TreeDataProvider<M5FSResource>
 
       try {
         const dir = (await SerialManager.listDir(com, extraPath)).toString();
-        vscode.window.showInformationMessage("const dir = (await SerialManager.listDir(com, extraPath)).toString();");
-        vscode.window.showInformationMessage(dir);
-        dir.split(',').forEach((dir) => {
-          if (!dir) {
-            return [];
-          }
-          const isFile = dir.indexOf('.') > -1;
-          const collapsibleState = isFile
-            ? vscode.TreeItemCollapsibleState.None
-            : vscode.TreeItemCollapsibleState.Collapsed;
-          const node = new M5FSResource(dir, '', extraPath, com, isFile ? FILE : FOLDER, collapsibleState);
-          // file open command
-          if (isFile) {
-            node.command = {
-              command: 'extension.openSelection',
-              title: 'readFile',
-              arguments: [com, `${extraPath}/${dir}`],
-            };
-          }
-          tree.push(node);
+        SerialManager.listDir(com, extraPath).then((res) => {
+          const dir = res.toString();
+          vscode.window.showInformationMessage(dir + "setdir");
+          dir.split(',').forEach((dir) => {
+            if (!dir) {
+              return [];
+            }
+            const isFile = dir.indexOf('.') > -1;
+            const collapsibleState = isFile
+              ? vscode.TreeItemCollapsibleState.None
+              : vscode.TreeItemCollapsibleState.Collapsed;
+            const node = new M5FSResource(dir, '', extraPath, com, isFile ? FILE : FOLDER, collapsibleState);
+            // file open command
+            if (isFile) {
+              node.command = {
+                command: 'extension.openSelection',
+                title: 'readFile',
+                arguments: [com, `${extraPath}/${dir}`],
+              };
+            }
+            tree.push(node);
+          })
+          // dir.split(',').forEach((dir) => {
+          //   if (!dir) {
+          //     return [];
+          //   }
+          //   const isFile = dir.indexOf('.') > -1;
+          //   const collapsibleState = isFile
+          //     ? vscode.TreeItemCollapsibleState.None
+          //     : vscode.TreeItemCollapsibleState.Collapsed;
+          //   const node = new M5FSResource(dir, '', extraPath, com, isFile ? FILE : FOLDER, collapsibleState);
+          //   // file open command
+          //   if (isFile) {
+          //     node.command = {
+          //       command: 'extension.openSelection',
+          //       title: 'readFile',
+          //       arguments: [com, `${extraPath}/${dir}`],
+          //     };
+          //   }
+          //   tree.push(node);
         });
       } catch (e: any) {
         vscode.window.showErrorMessage(e);

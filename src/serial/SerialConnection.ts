@@ -50,7 +50,7 @@ class SerialConnection {
       console.log('sending bytes', buffer);
       self.resolve = resolve;
       self.reject = reject;
-      self.write(Crc.coverCrc(buffer));
+      self.write(buffer);
     });
   }
 
@@ -71,7 +71,6 @@ class SerialConnection {
   }
 
   onData(chunk: Buffer): void {
-    this.isBusy = true;
     this.received = Buffer.concat([this.received, chunk]);
     this.resolve(this.received);
     this.isBusy = false;
