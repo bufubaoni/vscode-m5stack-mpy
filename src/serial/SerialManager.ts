@@ -1,6 +1,6 @@
 import { Console } from 'console';
 import SerialConnection from './SerialConnection';
-import { COMMAND_CODES, MICRO_INTER_CMD } from './types';
+import { COMMAND_CODES, MICRO_INTER_CMD, SIG } from './types';
 import vscode from 'vscode';
 
 type Connections = {
@@ -19,8 +19,29 @@ class SerialManager {
     this.m5[com] = new SerialConnection(com, openedCb);
   }
 
-  initCmd(com: string): Promise<Buffer> {
-    return this.m5[com].sendCommandWithBuffer(Buffer.from([MICRO_INTER_CMD.stopCurrent]));
+  async ainitCmd(com: string) {
+    try {
+      console.log("sendCommandWithBuffer:MICRO_INTER_CMD.endCMD:start " + com.toString());
+      const res = await this.m5[com].sendCommandWithBuffer(Buffer.from(MICRO_INTER_CMD.endCMD));
+      console.log("sendCommandWithBuffer:MICRO_INTER_CMD.endCMD:end");
+      console.log("sendCommandWithBuffer:MICRO_INTER_CMD.stopCurrent:start" + res.toString());
+      console.log(res.toString());
+      if (res.toString() === '') {
+        vscode.window.showInformationMessage('Raw REPL mode is now active.');
+        await this.m5[com].sendCommandWithBuffer(Buffer.from([MICRO_INTER_CMD.stopCurrent]));
+      } else if (res.toString().includes(SIG.logo)) {
+        vscode.window.showInformationMessage('Raw REPL mode from log.');
+        await this.m5[com].sendCommandWithBuffer(Buffer.from([MICRO_INTER_CMD.stopCurrent]));
+      } else if (res.toString().includes(SIG.RawReplStr)) {
+        vscode.window.showInformationMessage('Enter Raw REPL mode directly.');
+      }
+      else {
+        vscode.window.showErrorMessage('Failed to enter Raw REPL mode.');
+      }
+      console.log("init successful.");
+    } catch (e) {
+      throw new Error("init execution failed");
+    }
   }
 
   rawMode(com: string): Promise<Buffer> {
@@ -50,15 +71,52 @@ class SerialManager {
       console.log(e.toString());
     });;
     this.m5[com].sendCommandWithBuffer(Buffer.from(MICRO_INTER_CMD.endCMD.toString(16)));
-    return this.m5[com].sendCommandWithBuffer(Buffer.from([MICRO_INTER_CMD.endCMD]));
+    return this.m5[com].sendCommandWithBuffer(Buffer.from(MICRO_INTER_CMD.endCMD));
+  }
+
+  async alistDir(com: string, dirname: string): Promise<Buffer> {
+    try {
+      const cmd = `import os; files = os.listdir('${dirname}'); print(','.join(files));`;
+      const res = this.arunCmd(com, cmd)
+      console.log("end exec cmd result: " + res.toString())
+      return res;
+    } catch (e) {
+      console.error('Error occurred:', e.toString());
+      throw e;
+    }
+  }
+
+  async arunCmd(com: string, cmd: string): Promise<Buffer> {
+    await this.m5[com].sendCommandWithBuffer(Buffer.from(cmd));
+    const resp = await this.m5[com].sendCommandWithBuffer(Buffer.from(MICRO_INTER_CMD.endCMD))
+    const lines = resp.toString().split('\r\n');
+
+    // 2. 移除首行和末行（如果存在）
+    if (lines.length > 0) lines.shift(); // 移除第一行
+    if (lines.length > 0) lines.pop();   // 移除最后一行
+
+    // 3. 将剩余行重新组合为 Buffer
+    const result = lines.join('\r\n');
+    return Buffer.from(result); // 明确转换为 Buffer
+  }
+
+  async aendCmd(com: string): Promise<Buffer> {
+    return this.m5[com].sendCommandWithBuffer(Buffer.from(MICRO_INTER_CMD.endCMD));
   }
 
   isBusy(com: string) {
     return this.m5[com].busy;
   }
 
-  readFile(com: string, filename: string): Promise<Buffer> {
-    return this.m5[com].sendCommand(COMMAND_CODES.getFile, filename);
+  async readFile(com: string, filename: string): Promise<Buffer> {
+    try {
+      const cmd = `print(open('${filename}', 'r').read())`;
+      const res = this.arunCmd(com, cmd)
+      return res;
+    } catch (e) {
+      console.error('Error occurred:', e.toString());
+      throw e;
+    }
   }
 
   download(

@@ -1,8 +1,6 @@
 import SerialPort from 'serialport';
 import Crc from './Crc';
 import { defaultOpts } from './types';
-import * as vscode from 'vscode';
-import { check } from 'prettier';
 
 const comErroMessage = 'Communication error, sorry.';
 
@@ -14,6 +12,7 @@ class SerialConnection {
   public reject: (value: any) => void;
   private onOpenCb: (err: unknown) => void;
   private received: Buffer;
+  private dataTimeout?: NodeJS.Timeout;
   constructor(com: string, onOpenCb: (err: unknown) => void) {
     this.com = com;
     this.port = new SerialPort(com, defaultOpts);
@@ -21,8 +20,8 @@ class SerialConnection {
     this.port.on('open', this.onOpen.bind(this));
     this.port.on('data', this.onData.bind(this));
     this.received = Buffer.from([]);
-    this.resolve = (chuck) => { console.log(chuck) };
-    this.reject = () => { vscode.window.showInformationMessage("reject") };
+    this.resolve = () => { };
+    this.reject = () => { };
     this.onOpenCb = onOpenCb;
   }
 
@@ -47,7 +46,6 @@ class SerialConnection {
     this.received = Buffer.from([]);
     const self = this;
     return new Promise((resolve, reject) => {
-      console.log('sending bytes', buffer);
       self.resolve = resolve;
       self.reject = reject;
       self.write(buffer);
@@ -72,8 +70,13 @@ class SerialConnection {
 
   onData(chunk: Buffer): void {
     this.received = Buffer.concat([this.received, chunk]);
-    this.resolve(this.received);
-    this.isBusy = false;
+    if (this.dataTimeout) clearTimeout(this.dataTimeout);
+    this.dataTimeout = setTimeout(() => {
+      const completeData = this.received;
+      this.received = Buffer.from([]);
+      this.resolve(completeData);
+      this.isBusy = false;
+    }, 100);
   }
 
   onError(err: any): void {

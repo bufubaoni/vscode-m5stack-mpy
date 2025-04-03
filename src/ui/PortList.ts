@@ -14,7 +14,7 @@ type ResourceMapCache = {
   [key: string]: string;
 };
 
-const supportedTextFileTypes = ['py', 'json', 'txt'];
+const supportedTextFileTypes = ['py', 'json', 'txt', 'md'];
 
 class PortList {
   private selectedCOMs: PickedItem[] = [];

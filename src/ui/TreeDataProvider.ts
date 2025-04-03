@@ -1,7 +1,6 @@
 import * as path from 'path';
 import * as vscode from 'vscode';
 import SerialManager from '../serial/SerialManager';
-import { SIG } from '../serial/types';
 
 export const FILE = 'file';
 export const FOLDER = 'folder';
@@ -92,29 +91,7 @@ export class M5TreeDataProvider implements vscode.TreeDataProvider<M5FSResource>
           vscode.TreeItemCollapsibleState.Collapsed
         );
         tree.push(comNode);
-        SerialManager.initCmd(this.coms[i]).then((res) => {
-          vscode.window.showInformationMessage('Connection and init success.');
-          let connect = res.toString()
-          console.log(connect, SIG.logo)
-          if (connect.includes(SIG.logo)) {
-            vscode.window.showInformationMessage('Read connection logo.');
-            SerialManager.rawMode(this.coms[i]).then((res) => {
-              vscode.window.showInformationMessage(res.toString() + 'MicroPython is ready.');
-            }).catch((e) => {
-              vscode.window.showErrorMessage("inner" + e);
-            }).finally(() => {
-              vscode.window.showInformationMessage('Logo init finally');
-            });
-          } else if (connect.includes(SIG.RawReplStr)) {
-            vscode.window.showInformationMessage('MicroPython raw REPL is ready.');
-          } else {
-            vscode.window.showErrorMessage("connect error" + connect);
-          }
-        }).catch((e) => {
-          vscode.window.showErrorMessage(e);
-        }).finally(() => {
-          vscode.window.showErrorMessage('finally');
-        });
+        await SerialManager.ainitCmd(comNode.com);
       }
       return tree;
     } else {
@@ -124,49 +101,26 @@ export class M5TreeDataProvider implements vscode.TreeDataProvider<M5FSResource>
       if (element.contextValue === COM) {
         extraPath = '/flash';
       }
-
       try {
-        const dir = (await SerialManager.listDir(com, extraPath)).toString();
-        SerialManager.listDir(com, extraPath).then((res) => {
-          const dir = res.toString();
-          vscode.window.showInformationMessage(dir + "setdir");
-          dir.split(',').forEach((dir) => {
-            if (!dir) {
-              return [];
-            }
-            const isFile = dir.indexOf('.') > -1;
-            const collapsibleState = isFile
-              ? vscode.TreeItemCollapsibleState.None
-              : vscode.TreeItemCollapsibleState.Collapsed;
-            const node = new M5FSResource(dir, '', extraPath, com, isFile ? FILE : FOLDER, collapsibleState);
-            // file open command
-            if (isFile) {
-              node.command = {
-                command: 'extension.openSelection',
-                title: 'readFile',
-                arguments: [com, `${extraPath}/${dir}`],
-              };
-            }
-            tree.push(node);
-          })
-          // dir.split(',').forEach((dir) => {
-          //   if (!dir) {
-          //     return [];
-          //   }
-          //   const isFile = dir.indexOf('.') > -1;
-          //   const collapsibleState = isFile
-          //     ? vscode.TreeItemCollapsibleState.None
-          //     : vscode.TreeItemCollapsibleState.Collapsed;
-          //   const node = new M5FSResource(dir, '', extraPath, com, isFile ? FILE : FOLDER, collapsibleState);
-          //   // file open command
-          //   if (isFile) {
-          //     node.command = {
-          //       command: 'extension.openSelection',
-          //       title: 'readFile',
-          //       arguments: [com, `${extraPath}/${dir}`],
-          //     };
-          //   }
-          //   tree.push(node);
+        const dir = (await SerialManager.alistDir(com, extraPath)).toString();
+        dir.split(',').forEach((dir) => {
+          if (!dir) {
+            return [];
+          }
+          const isFile = dir.indexOf('.') > -1;
+          const collapsibleState = isFile
+            ? vscode.TreeItemCollapsibleState.None
+            : vscode.TreeItemCollapsibleState.Collapsed;
+          const node = new M5FSResource(dir, '', extraPath, com, isFile ? FILE : FOLDER, collapsibleState);
+          // file open command
+          if (isFile) {
+            node.command = {
+              command: 'extension.openSelection',
+              title: 'readFile',
+              arguments: [com, `${extraPath}/${dir}`],
+            };
+          }
+          tree.push(node);
         });
       } catch (e: any) {
         vscode.window.showErrorMessage(e);

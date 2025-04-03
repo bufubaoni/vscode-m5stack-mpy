@@ -20,7 +20,7 @@ export const MICRO_INTER_CMD = {
   stopCurrent: 0x03,
   softRebot: 0x04,
   passMode: 0x05,
-  endCMD: 0x0d,
+  endCMD: '\r\n',
 }
 
 export const SIG = {
