@@ -44,11 +44,6 @@ class SerialManager {
     }
   }
 
-  rawMode(com: string): Promise<Buffer> {
-    return this.m5[com].sendCommandWithBuffer(Buffer.from([MICRO_INTER_CMD.setRawRepl]));
-  }
-
-
   exec(com: string, code: string): Promise<Buffer> {
     return this.m5[com].sendCommand(COMMAND_CODES.exec, code);
   }
@@ -77,7 +72,7 @@ class SerialManager {
   async alistDir(com: string, dirname: string): Promise<Buffer> {
     try {
       const cmd = `import os; files = os.listdir('${dirname}'); print(','.join(files));`;
-      const res = this.arunCmd(com, cmd)
+      const res = await this.arunCmd(com, cmd);
       console.log("end exec cmd result: " + res.toString())
       return res;
     } catch (e) {
@@ -88,20 +83,14 @@ class SerialManager {
 
   async arunCmd(com: string, cmd: string): Promise<Buffer> {
     await this.m5[com].sendCommandWithBuffer(Buffer.from(cmd));
-    const resp = await this.m5[com].sendCommandWithBuffer(Buffer.from(MICRO_INTER_CMD.endCMD))
-    const lines = resp.toString().split('\r\n');
+    const resp2 = await this.m5[com].sendCommandWithBuffer(Buffer.from(MICRO_INTER_CMD.endCMD))
+    const lines = resp2.toString().split(MICRO_INTER_CMD.endCMD);
 
-    // 2. 移除首行和末行（如果存在）
-    if (lines.length > 0) lines.shift(); // 移除第一行
-    if (lines.length > 0) lines.pop();   // 移除最后一行
+    if (lines.length > 0) lines.shift();
+    if (lines.length > 0) lines.pop();
 
-    // 3. 将剩余行重新组合为 Buffer
-    const result = lines.join('\r\n');
-    return Buffer.from(result); // 明确转换为 Buffer
-  }
-
-  async aendCmd(com: string): Promise<Buffer> {
-    return this.m5[com].sendCommandWithBuffer(Buffer.from(MICRO_INTER_CMD.endCMD));
+    const result = lines.join(MICRO_INTER_CMD.endCMD);
+    return Buffer.from(result);
   }
 
   isBusy(com: string) {

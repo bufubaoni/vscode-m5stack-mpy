@@ -46,6 +46,7 @@ class SerialConnection {
     this.received = Buffer.from([]);
     const self = this;
     return new Promise((resolve, reject) => {
+      console.log('sending bytes', buffer);
       self.resolve = resolve;
       self.reject = reject;
       self.write(buffer);
@@ -76,7 +77,7 @@ class SerialConnection {
       this.received = Buffer.from([]);
       this.resolve(completeData);
       this.isBusy = false;
-    }, 100);
+    }, 200);
   }
 
   onError(err: any): void {
