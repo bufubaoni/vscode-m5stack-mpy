@@ -116,18 +116,18 @@ class SerialManager {
     isBinary?: boolean
   ): Promise<Buffer> {
     const data = isBinary ? (content as Buffer) : Buffer.from(content);
-    let chunkSize: number = 64
-    const totalChunks = Math.ceil(data.length / chunkSize);
+    const mode = flag === 0x01 ? 'wb' : 'ab'; // 根据标志决定写入模式
 
-    await this.arunCmd(com, `f=open("${filename}","wb"); f.close()`);
-
-    for (let i = 0; i < totalChunks; i++) {
-      const chunk = data.slice(i * chunkSize, (i + 1) * chunkSize);
-      const cmd = `f=open("${filename}","ab"); f.write(${JSON.stringify(chunk.toString('binary'))}); f.close()`;
-      await this.arunCmd(com, cmd);
+    try {
+      // 单次写入全部数据
+      const cmd = `f=open("${filename}","${mode}"); f.write(${JSON.stringify(data.toString('binary'))}); f.close()`;
+      const result = await this.arunCmd(com, cmd);
+      console.log(`return: ${result.toString()}`);
+      return Buffer.from('done');
+    } catch (err) {
+      vscode.window.showErrorMessage(`Failed to save ${filename}: ${err.message}`);
+      return Promise.reject(Buffer.from(err.message));
     }
-    vscode.window.showInformationMessage(`save ${filename} done`)
-    return Buffer.from("done");
   }
 
   async bulkDownload(
@@ -135,42 +135,36 @@ class SerialManager {
     filename: string,
     content: string | Buffer,
     isBinary: boolean,
-    progressCb: (chunkIndex: number) => void
+    progressCb: (chunkIndex: number) => void,
+    chunkSize: number = 64
   ): Promise<Buffer> {
-    let dataChunks = [];
+    const data = isBinary ? (content as Buffer) : Buffer.from(content);
+    const totalChunks = Math.ceil(data.length / chunkSize);
 
-    if (content.length > MAX_CHUNK_LENGTH) {
-      let part = Math.ceil(content.length / MAX_CHUNK_LENGTH);
-      for (let i = 0; i < part; i++) {
-        dataChunks[i] = content.slice(i * MAX_CHUNK_LENGTH, MAX_CHUNK_LENGTH * (i + 1));
-      }
-    }
+    try {
+      // 第一片用覆盖模式，后续用追加模式
+      for (let i = 0; i < totalChunks; i++) {
+        const chunk = data.slice(i * chunkSize, (i + 1) * chunkSize);
+        const result = await this.download(
+          com,
+          filename,
+          chunk,
+          i === 0 ? 0x01 : 0x00, // 首片覆盖，后续追加
+          isBinary
+        );
 
-    if (!dataChunks.length) {
-      return this.download(com, filename, content, 0x01); // overwrite
-    } else {
-      for (let i = 0; i < dataChunks.length; i++) {
-        if (i === 0) {
-          const result = await this.download(com, filename, dataChunks[i], 0x01, isBinary); // overwrite
-          progressCb(i + 1);
-          if (result.toString().indexOf('done') < 0) {
-            return Promise.reject(
-              Buffer.from(`An error occurred while saving ${filename}: ${result.toString()}`)
-            );
-          }
-          continue;
-        }
-        const result = await this.download(com, filename, dataChunks[i], 0x00, isBinary); // append
         if (result.toString().indexOf('done') < 0) {
-          return Promise.reject(
-            Buffer.from(`An error occurred while saving ${filename}: ${result.toString()}`)
-          );
+          throw new Error(`Chunk ${i} failed: ${result.toString()}`);
         }
-        progressCb(i + 1);
-      }
-    }
 
-    return Promise.resolve(Buffer.from('done'));
+        progressCb(i + 1); // 报告进度
+      }
+
+      return Buffer.from('done');
+    } catch (err) {
+      vscode.window.showErrorMessage(`Bulk download failed at chunk: ${err.message}`);
+      return Promise.reject(Buffer.from(err.message));
+    }
   }
 
   removeFile(com: string, filename: string) {
