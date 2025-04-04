@@ -99,7 +99,7 @@ class SerialManager {
 
   async readFile(com: string, filename: string): Promise<Buffer> {
     try {
-      const cmd = `print(open('${filename}', 'r').read())`;
+      const cmd = `f = open('${filename}', 'r'); print(f.read()); f.close();`;
       const res = this.arunCmd(com, cmd)
       return res;
     } catch (e) {
@@ -108,7 +108,7 @@ class SerialManager {
     }
   }
 
-  download(
+  async download(
     com: string,
     filename: string,
     content: string | Buffer,
@@ -116,14 +116,18 @@ class SerialManager {
     isBinary?: boolean
   ): Promise<Buffer> {
     const data = isBinary ? (content as Buffer) : Buffer.from(content);
-    const buffer = Buffer.concat([
-      Buffer.from([COMMAND_CODES.downloadFile]),
-      Buffer.from(filename),
-      Buffer.from([0x00]),
-      Buffer.from([flag]),
-      data,
-    ]);
-    return this.m5[com].sendCommandWithBuffer(buffer);
+    let chunkSize: number = 64
+    const totalChunks = Math.ceil(data.length / chunkSize);
+
+    await this.arunCmd(com, `f=open("${filename}","wb"); f.close()`);
+
+    for (let i = 0; i < totalChunks; i++) {
+      const chunk = data.slice(i * chunkSize, (i + 1) * chunkSize);
+      const cmd = `f=open("${filename}","ab"); f.write(${JSON.stringify(chunk.toString('binary'))}); f.close()`;
+      await this.arunCmd(com, cmd);
+    }
+    vscode.window.showInformationMessage(`save ${filename} done`)
+    return Buffer.from("done");
   }
 
   async bulkDownload(
