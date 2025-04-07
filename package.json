@@ -1,5 +1,5 @@
 {
-	"name": "vscode-m5stack-mpy-uiflow2.0",
+	"name": "vscode-m5stack-mpy-uiflow2",
 	"displayName": "vscode-m5stack-mpy-uiflow2.0",
 	"description": "A extension for M5Stack Micropython system to suport uiflow2.0.",
 	"publisher": "curdeveryday",
