@@ -28,7 +28,7 @@
 		"views": {
 			"explorer": [
 				{
-					"id": "m5stack",
+					"id": "m5stack-v2",
 					"name": "M5Stack Device"
 				}
 			]

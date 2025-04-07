@@ -8,7 +8,7 @@ import portList from './ui/PortList';
 // https://github.com/microsoft/vscode-extension-samples
 // https://code.visualstudio.com/api/references/extension-guidelines
 export function activate(context: vscode.ExtensionContext) {
-  console.log('Extension "vscode-m5stack-mpy" is now active!');
+  console.log('Extension "vscode-m5stack-mpy-uiflow2" is now active!');
 
   const selectPorts = () => portList.selectPorts();
   const openFile = (port: string, filepath: string) => portList.readFile(port, filepath);
@@ -35,4 +35,4 @@ export function activate(context: vscode.ExtensionContext) {
   );
 }
 
-export function deactivate() {}
+export function deactivate() { }
