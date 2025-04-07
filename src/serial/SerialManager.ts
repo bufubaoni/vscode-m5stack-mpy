@@ -65,7 +65,7 @@ class SerialManager {
     }).catch((e) => {
       console.log(e.toString());
     });;
-    this.m5[com].sendCommandWithBuffer(Buffer.from(MICRO_INTER_CMD.endCMD.toString(16)));
+    this.m5[com].sendCommandWithBuffer(Buffer.from(MICRO_INTER_CMD.endCMD));
     return this.m5[com].sendCommandWithBuffer(Buffer.from(MICRO_INTER_CMD.endCMD));
   }
 
@@ -75,9 +75,10 @@ class SerialManager {
       const res = await this.arunCmd(com, cmd);
       console.log("end exec cmd result: " + res.toString())
       return res;
-    } catch (e) {
-      console.error('Error occurred:', e.toString());
-      throw e;
+    } catch (err) {
+      const error = err as Error;
+      console.error('Error occurred:', error.toString());
+      throw error;
     }
   }
 
@@ -102,9 +103,10 @@ class SerialManager {
       const cmd = `f = open('${filename}', 'r'); print(f.read()); f.close();`;
       const res = this.arunCmd(com, cmd)
       return res;
-    } catch (e) {
-      console.error('Error occurred:', e.toString());
-      throw e;
+    } catch (err) {
+      const error = err as Error;
+      console.error('Error occurred:', error.toString());
+      throw err;
     }
   }
 
@@ -125,8 +127,9 @@ class SerialManager {
       console.log(`return: ${result.toString()}`);
       return Buffer.from('done');
     } catch (err) {
-      vscode.window.showErrorMessage(`Failed to save ${filename}: ${err.message}`);
-      return Promise.reject(Buffer.from(err.message));
+      const error = err as Error;
+      vscode.window.showErrorMessage(`Failed to save ${filename}: ${error.message}`);
+      return Promise.reject(Buffer.from(error.message));
     }
   }
 
@@ -162,8 +165,9 @@ class SerialManager {
 
       return Buffer.from('done');
     } catch (err) {
-      vscode.window.showErrorMessage(`Bulk download failed at chunk: ${err.message}`);
-      return Promise.reject(Buffer.from(err.message));
+      const error = err as Error;
+      vscode.window.showErrorMessage(`Bulk download failed at chunk: ${error.message}`);
+      return Promise.reject(Buffer.from(error.message));
     }
   }
 
