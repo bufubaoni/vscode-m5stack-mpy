@@ -12,7 +12,7 @@
 		"mpy",
 		"uiflow2.0"
 	],
-	"version": "0.0.01",
+	"version": "0.0.1",
 	"engines": {
 		"vscode": "^1.48.0"
 	},
