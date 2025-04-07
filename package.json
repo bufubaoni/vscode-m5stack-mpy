@@ -2,7 +2,7 @@
 	"name": "vscode-m5stack-mpy-uiflow2",
 	"displayName": "vscode-m5stack-mpy-uiflow2.0",
 	"description": "A extension for M5Stack Micropython system to suport uiflow2.0.",
-	"publisher": "curdeveryday",
+	"publisher": "bufubaoni",
 	"repository": {
 		"url": "https://github.com/bufubaoni/vscode-m5stack-mpy.git",
 		"type": "git"
@@ -149,7 +149,8 @@
 		"integration-tests": "node ./out/test/runTest.js",
 		"test": "jest",
 		"vscode:prepublish": "yarn run package",
-		"watch": "webpack --watch"
+		"watch": "webpack --watch",
+		"version": "npm version"
 	},
 	"devDependencies": {
 		"@jest/types": "^27.4.2",
@@ -181,6 +182,7 @@
 		"webpack-cli": "^4.8.0"
 	},
 	"dependencies": {
-		"serialport": "10.0.1"
+		"@serialport/bindings": "9.0.1",
+		"serialport": "9.0.1"
 	}
 }

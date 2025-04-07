@@ -14,6 +14,7 @@ A extension for M5Stack Micropython system.
 - Delete files in M5Stack Device
 - Execute command in M5Stack Device
 - Recovery running status of M5Stack Device
+- Upgrade @serialport/bindings version
 
 ## Quick Start
 
