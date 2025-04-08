@@ -23,8 +23,8 @@ class StatusBar {
 
   constructor() {
     const item = vscode.window.createStatusBarItem();
-    item.text = `Add M5Stack`;
-    item.command = `vscode-m5stack-mpyreader.selectPorts`;
+    item.text = `Add M5Stack with microPython`;
+    item.command = `vscode-m5stackv2-mpyreader.selectPorts`;
     item.show();
   }
 
@@ -32,12 +32,12 @@ class StatusBar {
     const item = vscode.window.createStatusBarItem();
     item.text = `${com.label}`;
     item.name = `${com.label}`;
-    item.command = `vscode-m5stack-mpyreader.openPort${com.label}`;
+    item.command = `vscode-m5stackv2-mpyreader.openPort${com.label}`;
     item.show();
 
     try {
       const disposable = vscode.commands.registerCommand(
-        `vscode-m5stack-mpyreader.openPort${com.label}`,
+        `vscode-m5stackv2-mpyreader.openPort${com.label}`,
         () => this._selectAction(com.label)
       );
 

@@ -1,4 +1,5 @@
-import SerialPort from 'serialport';
+import { SerialPort } from 'serialport';
+import { InterByteTimeoutParser } from '@serialport/parser-inter-byte-timeout';
 import Crc from './Crc';
 import { defaultOpts } from './types';
 
@@ -13,12 +14,15 @@ class SerialConnection {
   private onOpenCb: (err: unknown) => void;
   private received: Buffer;
   private dataTimeout?: NodeJS.Timeout;
+  private parser: InterByteTimeoutParser;
+
   constructor(com: string, onOpenCb: (err: unknown) => void) {
     this.com = com;
-    this.port = new SerialPort(com, defaultOpts);
-    this.port.on('error', this.onError);
-    this.port.on('open', this.onOpen.bind(this));
-    this.port.on('data', this.onData.bind(this));
+    this.port = new SerialPort({ path: com, ...defaultOpts });
+    this.parser = this.port.pipe(new InterByteTimeoutParser({ interval: 30 }));
+    this.parser.on('data', (data: string) => this.onData(Buffer.from(data))); // 确保数据是 Buffer
+    this.port.on('error', (err) => this.onError(err));
+    this.port.on('open', (err) => this.onOpen(err));
     this.received = Buffer.from([]);
     this.resolve = () => { };
     this.reject = () => { };
@@ -26,12 +30,7 @@ class SerialConnection {
   }
 
   static getCOMs(): Promise<SerialPort.PortInfo[]> {
-    return new Promise((resolve) => {
-      SerialPort.list().then(
-        (ports: SerialPort.PortInfo[]) => resolve(ports),
-        (err: any) => resolve([])
-      );
-    });
+    return SerialPort.list()
   }
 
   get busy(): boolean {
@@ -70,7 +69,8 @@ class SerialConnection {
   }
 
   onData(chunk: Buffer): void {
-    this.received = Buffer.concat([this.received, chunk]);
+    const data = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk);
+    this.received = Buffer.concat([this.received, data]);
     if (this.dataTimeout) clearTimeout(this.dataTimeout);
     this.dataTimeout = setTimeout(() => {
       const completeData = this.received;
