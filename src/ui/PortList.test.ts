@@ -5,6 +5,7 @@ import SerialConnection from '../serial/SerialConnection';
 import SerialManager from '../serial/SerialManager';
 import Portlist from './PortList';
 import StatusBar from './StatusBar';
+import { PortInfo } from '@serialport/bindings-interface';
 
 jest.mock('../serial/SerialManager', () => ({
   connect: jest.fn(),
@@ -152,11 +153,17 @@ describe('PortList', () => {
   describe('selectPorts', () => {
     test('should connect selected port', async () => {
       // ARRANGE
-      jest.spyOn(Portlist, 'refreshTree').mockImplementationOnce(() => {});
+      jest.spyOn(Portlist, 'refreshTree').mockImplementationOnce(() => { });
       jest.spyOn(SerialConnection, 'getCOMs').mockResolvedValue([
         {
           path: '/dev/device',
-        },
+          manufacturer: 'Mock Manufacturer',
+          serialNumber: '12345',
+          pnpId: 'mock-pnp-id',
+          locationId: 'mock-location-id',
+          vendorId: 'mock-vendor',
+          productId: 'mock-product'
+        } as PortInfo,
       ]);
       // @ts-ignore
       jest.spyOn(vscode.window, 'showQuickPick').mockResolvedValue([
@@ -282,7 +289,7 @@ describe('PortList', () => {
       // ARRANGE
       vscode.window.activeTextEditor = buildActiveTextEditor();
       jest.spyOn(vscode.window, 'showInputBox').mockResolvedValue('python.py');
-      jest.spyOn(Portlist, 'refreshTree').mockImplementationOnce(() => {});
+      jest.spyOn(Portlist, 'refreshTree').mockImplementationOnce(() => { });
       jest.spyOn(SerialManager, 'exec').mockResolvedValue(Buffer.from('done'));
       const spyShowInfo = jest.spyOn(vscode.window, 'showInformationMessage');
 
@@ -297,7 +304,7 @@ describe('PortList', () => {
       // ARRANGE
       vscode.window.activeTextEditor = buildActiveTextEditor();
       jest.spyOn(vscode.window, 'showInputBox').mockResolvedValue('python.py');
-      jest.spyOn(Portlist, 'refreshTree').mockImplementationOnce(() => {});
+      jest.spyOn(Portlist, 'refreshTree').mockImplementationOnce(() => { });
       jest.spyOn(SerialManager, 'exec').mockResolvedValue(Buffer.from('crc error'));
       const spyShowInfo = jest.spyOn(vscode.window, 'showErrorMessage');
 
@@ -313,7 +320,7 @@ describe('PortList', () => {
     test('should allow creating new file', async () => {
       // ARRANGE
       jest.spyOn(vscode.window, 'showInputBox').mockResolvedValue('python.py');
-      jest.spyOn(Portlist, 'refreshTree').mockImplementationOnce(() => {});
+      jest.spyOn(Portlist, 'refreshTree').mockImplementationOnce(() => { });
       jest.spyOn(SerialManager, 'download').mockResolvedValue(Buffer.from('done'));
       const spyShowInfo = jest.spyOn(vscode.window, 'showInformationMessage');
 
@@ -327,7 +334,7 @@ describe('PortList', () => {
     test('should show an error when creating new file has failed', async () => {
       // ARRANGE
       jest.spyOn(vscode.window, 'showInputBox').mockResolvedValue('python.py');
-      jest.spyOn(Portlist, 'refreshTree').mockImplementationOnce(() => {});
+      jest.spyOn(Portlist, 'refreshTree').mockImplementationOnce(() => { });
       jest.spyOn(SerialManager, 'download').mockResolvedValue(Buffer.from('crc error'));
       const spyShowInfo = jest.spyOn(vscode.window, 'showErrorMessage');
 

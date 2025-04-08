@@ -117,7 +117,7 @@ class SerialManager {
     flag: number,
     isBinary?: boolean
   ): Promise<Buffer> {
-    const data = isBinary ? (content as Buffer) : Buffer.from(content);
+    const data = isBinary ? (content as Buffer) : Buffer.from(content as string);
     const mode = flag === 0x01 ? 'wb' : 'ab'; // 根据标志决定写入模式
 
     try {
@@ -141,7 +141,7 @@ class SerialManager {
     progressCb: (chunkIndex: number) => void,
     chunkSize: number = 64
   ): Promise<Buffer> {
-    const data = isBinary ? (content as Buffer) : Buffer.from(content);
+    const data = isBinary ? (content as Buffer) : Buffer.from(content as string);
     const totalChunks = Math.ceil(data.length / chunkSize);
 
     try {

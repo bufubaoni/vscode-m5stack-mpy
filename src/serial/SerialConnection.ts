@@ -1,5 +1,6 @@
 import { SerialPort } from 'serialport';
 import { InterByteTimeoutParser } from '@serialport/parser-inter-byte-timeout';
+import { PortInfo } from '@serialport/bindings-interface';
 import Crc from './Crc';
 import { defaultOpts } from './types';
 
@@ -29,7 +30,7 @@ class SerialConnection {
     this.onOpenCb = onOpenCb;
   }
 
-  static getCOMs(): Promise<SerialPort.PortInfo[]> {
+  static getCOMs(): Promise<PortInfo[]> {
     return SerialPort.list()
   }
 
