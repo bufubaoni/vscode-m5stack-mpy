@@ -6,6 +6,7 @@ out/**
 !node_modules/debug
 !node_modules/@serialport
 !node_modules/serialport
+!node_modules/node-gyp-build
 node_modules/**
 src/**
 .gitignore

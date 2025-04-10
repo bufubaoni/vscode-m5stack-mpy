@@ -8,3 +8,5 @@ dist/
 *.code-workspace
 .DS_Store
 .vscode/
+package-lock.json
+yarn.lock

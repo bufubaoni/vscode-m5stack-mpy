@@ -12,7 +12,7 @@
 		"mpy",
 		"uiflow2.0"
 	],
-	"version": "0.0.1",
+	"version": "0.0.2",
 	"engines": {
 		"vscode": "^1.48.0"
 	},
@@ -29,7 +29,7 @@
 			"explorer": [
 				{
 					"id": "m5stackv2",
-					"name": "M5Stack Device"
+					"name": "M5Stack Device with uiflow2.0"
 				}
 			]
 		},
@@ -62,32 +62,32 @@
 			"view/item/context": [
 				{
 					"command": "m5stackv2.deleteEntry",
-					"when": "view == m5stack && viewItem == file",
+					"when": "view == m5stackv2 && viewItem == file",
 					"group": "inline"
 				},
 				{
 					"command": "m5stackv2.addEntry",
-					"when": "view == m5stack && viewItem == folder",
+					"when": "view == m5stackv2 && viewItem == folder",
 					"group": "inline"
 				},
 				{
 					"command": "m5stackv2.refreshEntry",
-					"when": "view == m5stack && viewItem == COM",
+					"when": "view == m5stackv2 && viewItem == COM",
 					"group": "inline"
 				},
 				{
 					"command": "m5stackv2.addEntry",
-					"when": "view == m5stack && viewItem == COM",
+					"when": "view == m5stackv2 && viewItem == COM",
 					"group": "inline"
 				},
 				{
 					"command": "m5stackv2.itemUpload",
-					"when": "view == m5stack && viewItem == folder",
+					"when": "view == m5stackv2 && viewItem == folder",
 					"group": "inline"
 				},
 				{
 					"command": "m5stackv2.itemUpload",
-					"when": "view == m5stack && viewItem == COM",
+					"when": "view == m5stackv2 && viewItem == COM",
 					"group": "inline"
 				}
 			]
@@ -182,7 +182,8 @@
 		"webpack-cli": "^4.8.0"
 	},
 	"dependencies": {
-		"@serialport/bindings-cpp": "13.0.1",
+		"@serialport/bindings-cpp": "^13.0.1",
+		"node-gyp-build": "^4.8.4",
 		"serialport": "^13.0.0"
 	}
 }
