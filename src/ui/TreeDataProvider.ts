@@ -6,13 +6,6 @@ export const FILE = 'file';
 export const FOLDER = 'folder';
 export const COM = 'COM';
 
-export enum Icons {
-  com = 'folder-core.svg',
-  folder = 'folder-resource.svg',
-  python = 'python.svg',
-  image = 'image.svg',
-}
-
 type DeviceContext = typeof FILE | typeof FOLDER | typeof COM;
 
 export class M5FSResource extends vscode.TreeItem {
@@ -34,30 +27,17 @@ export class M5FSResource extends vscode.TreeItem {
     this.contextValue = contextValue;
     this.command = command;
 
-    switch (contextValue) {
-      case FILE: {
-        if (this.label.indexOf('.py') > -1) {
-          this.icon = Icons.python;
-        }
-        if (/(.jpg)|(.jpeg)|(.bmp)|(.png)|(.gif)/g.test(this.label.toLowerCase())) {
-          this.icon = Icons.image;
-        }
-        break;
-      }
-      case FOLDER: {
-        this.icon = Icons.folder;
-        break;
-      }
-      case COM: {
-        this.icon = Icons.com;
-        break;
-      }
+    if (contextValue === FILE || contextValue === FOLDER) {
+      this.resourceUri = vscode.Uri.parse(`file:///${this.label}`);
     }
 
-    this.iconPath = {
-      light: vscode.Uri.file(path.join(__filename, '..', '..', 'resources', 'light', this.icon)),
-      dark: vscode.Uri.file(path.join(__filename, '..', '..', 'resources', 'dark', this.icon)),
-    };
+    if (contextValue === COM) {
+      this.icon = 'folder-core.svg';
+      this.iconPath = {
+        light: vscode.Uri.file(path.join(__filename, '..', '..', 'resources', 'light', this.icon)),
+        dark: vscode.Uri.file(path.join(__filename, '..', '..', 'resources', 'dark', this.icon)),
+      };
+    }
   }
 }
 

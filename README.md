@@ -14,7 +14,6 @@ A extension for M5Stack Micropython system.
 - Execute command in M5Stack Device
 - Recovery running status of M5Stack Device
 - Enable Snippet
-- Use Icons settings
 
 ## Quick Start
 
