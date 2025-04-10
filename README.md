@@ -6,7 +6,6 @@ A extension for M5Stack Micropython system.
 
 - Write/Read files in M5Stack Device
 - Syntax-highlighting
-- Snippet
 - Auto Completion
 - Debugging
 
@@ -14,7 +13,8 @@ A extension for M5Stack Micropython system.
 - Delete files in M5Stack Device
 - Execute command in M5Stack Device
 - Recovery running status of M5Stack Device
-- Upgrade @serialport/bindings version
+- Enable Snippet
+- Use Icons settings
 
 ## Quick Start
 
