@@ -99,15 +99,35 @@ class SerialManager {
     return this.m5[com].busy;
   }
 
-  async readFile(com: string, filename: string): Promise<Buffer> {
+  async readFile(
+    com: string,
+    filename: string,
+    chunkSize: number = 256
+  ): Promise<Buffer> {
+    let offset = 0;
+    const chunks: Buffer[] = [];
+
     try {
-      const cmd = `f = open('${filename}', 'rb'); print(f.read()); f.close();`;
-      console.log(cmd);
-      const res = this.arunCmd(com, cmd)
-      return res;
+      while (true) {
+        const cmd = `f=open('${filename}','r');f.seek(${offset});chunk=f.read(${chunkSize});f.close();print(chunk)`;
+        console.log(`[CMD] Offset=${offset}, Size=${chunkSize}, ${cmd}`);
+
+        const rawResponse = (await this.arunCmd(com, cmd)).toString();
+        let [sizeStr, hexData] = rawResponse.split('\r\n', 2);
+        hexData = rawResponse.replace(`${sizeStr}\r\n`, "");
+        const res = hexData.toString()
+        if (!res) {
+          break;
+        }
+
+        // 将16进制数据转为 Buffer 并存储
+        chunks.push(Buffer.from(res));
+        offset += chunkSize;
+      }
+
+      return Buffer.concat(chunks);
     } catch (err) {
-      const error = err as Error;
-      console.error('Error occurred:', error.toString());
+      console.error('Error:', err instanceof Error ? err.message : String(err));
       throw err;
     }
   }

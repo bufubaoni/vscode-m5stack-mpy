@@ -21,6 +21,7 @@ export const MICRO_INTER_CMD = {
   softRebot: 0x04,
   passMode: 0x05,
   endCMD: '\r\n',
+  endFile: '\r\nb\'\''
 }
 
 export const SIG = {
