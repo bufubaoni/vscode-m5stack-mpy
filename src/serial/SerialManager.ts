@@ -109,19 +109,18 @@ class SerialManager {
 
     try {
       while (true) {
-        const cmd = `f=open('${filename}','r');f.seek(${offset});chunk=f.read(${chunkSize});f.close();print(chunk)`;
+        const cmd = `f=open('${filename}','rb');f.seek(${offset});chunk=f.read(${chunkSize});f.close();print(chunk.hex())`;
         console.log(`[CMD] Offset=${offset}, Size=${chunkSize}, ${cmd}`);
 
         const rawResponse = (await this.arunCmd(com, cmd)).toString();
-        let [sizeStr, hexData] = rawResponse.split('\r\n', 2);
-        hexData = rawResponse.replace(`${sizeStr}\r\n`, "");
+        let [sizeStr, hexData] = rawResponse.split(MICRO_INTER_CMD.endCMD, 2);
+        hexData = rawResponse.replace(`${sizeStr}${MICRO_INTER_CMD.endCMD}`, "");
         const res = hexData.toString()
-        if (!res) {
+        if (res == "b''") {
           break;
         }
 
-        // 将16进制数据转为 Buffer 并存储
-        chunks.push(Buffer.from(res));
+        chunks.push(Buffer.from(res, 'hex'));
         offset += chunkSize;
       }
 
