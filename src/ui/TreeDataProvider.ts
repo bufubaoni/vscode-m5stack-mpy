@@ -95,7 +95,7 @@ export class M5TreeDataProvider implements vscode.TreeDataProvider<M5FSResource>
           // file open command
           if (isFile) {
             node.command = {
-              command: 'extension.openSelection',
+              command: 'extension.m5stackv2.openSelection',
               title: 'readFile',
               arguments: [com, `${extraPath}/${dir}`],
             };

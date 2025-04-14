@@ -21,8 +21,8 @@ export function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(
     vscode.commands.registerCommand('vscode-m5stackv2-mpyreader.selectPorts', selectPorts, context),
     vscode.commands.registerCommand('m5stackv2.refreshEntry', refreshTree, context),
-    vscode.commands.registerCommand('extension.openSelection', openFile, context),
-    vscode.commands.registerCommand('extension.reset.device', resetDevice, context),
+    vscode.commands.registerCommand('extension.m5stackv2.openSelection', openFile, context),
+    vscode.commands.registerCommand('extension.m5stackv2.reset.device', resetDevice, context),
     vscode.commands.registerCommand('m5stackv2.addEntry', createFile, context),
     vscode.commands.registerCommand('m5stackv2.deleteEntry', removeFile, context),
     vscode.commands.registerCommand('m5stackv2.itemUpload', uploadFile, context),

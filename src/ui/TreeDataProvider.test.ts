@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { COM, FILE, FOLDER, Icons, M5FSResource, M5TreeDataProvider } from './TreeDataProvider';
+import { COM, FILE, FOLDER, M5FSResource, M5TreeDataProvider } from './TreeDataProvider';
 jest.mock('../serial/SerialManager', () => ({
   listDir: () => Promise.resolve(['file1.py', 'directory']),
 }));
@@ -20,7 +20,6 @@ describe('TreeDataProvider', () => {
       // ASSERT
       expect(res.com).toBe('/dev/tty');
       expect(res.description).toBe('version');
-      expect(res.icon).toBe(Icons.com);
       expect(res.parent).toBe('');
       expect(res.tooltip).toBe('device-version');
     });
@@ -38,7 +37,6 @@ describe('TreeDataProvider', () => {
       // ASSERT
       expect(res.com).toBe('/dev/tty');
       expect(res.description).toBe('version');
-      expect(res.icon).toBe(Icons.python);
       expect(res.parent).toBe('');
       expect(res.tooltip).toBe('file.py-version');
     });
@@ -56,7 +54,6 @@ describe('TreeDataProvider', () => {
       // ASSERT
       expect(res.com).toBe('/dev/tty');
       expect(res.description).toBe('version');
-      expect(res.icon).toBe(Icons.image);
       expect(res.parent).toBe('');
       expect(res.tooltip).toBe('file.jpg-version');
     });
@@ -74,7 +71,6 @@ describe('TreeDataProvider', () => {
       // ASSERT
       expect(res.com).toBe('/dev/tty');
       expect(res.description).toBe('version');
-      expect(res.icon).toBe(Icons.folder);
       expect(res.parent).toBe('');
       expect(res.tooltip).toBe('folder-version');
     });
@@ -154,7 +150,7 @@ describe('TreeDataProvider', () => {
       // ASSERT
       const expectedChildResources = [
         new M5FSResource('file1.py', '', '/flash', '/dev/tty', FILE, vscode.TreeItemCollapsibleState.None, {
-          command: 'extension.openSelection',
+          command: 'extension.m5stackv2.openSelection',
           title: 'readFile',
           arguments: ['/dev/tty', `/flash/file1.py`],
         }),

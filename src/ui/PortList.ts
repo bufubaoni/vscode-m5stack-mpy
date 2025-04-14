@@ -150,11 +150,15 @@ class PortList {
       let base64Image = this.resourceCache[filepath];
       if (!base64Image) {
         const img = await SerialManager.readFile(port, filepath);
+        console.log('====read img start====');
+        console.log(img);
+        console.log('====read img end====');
         base64Image = img.toString('base64');
         this.resourceCache[filepath] = base64Image;
       }
 
       panel.webview.html = `<img src="data:image/${fileExtension};base64,${base64Image}" />`;
+      console.log(panel.webview.html);
       return;
     }
     if (!supportedTextFileTypes.includes(fileExtension)) {

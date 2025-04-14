@@ -14,7 +14,7 @@
 	],
 	"version": "0.0.2",
 	"engines": {
-		"vscode": "^1.48.0"
+		"vscode": "^1.65.0"
 	},
 	"categories": [
 		"Other"
@@ -36,7 +36,7 @@
 		"menus": {
 			"editor/context": [
 				{
-					"command": "extension.reset.device",
+					"command": "extension.m5stackv2.reset.device",
 					"when": "resourceScheme == m5stackfs",
 					"group": "navigation"
 				},
@@ -94,7 +94,7 @@
 		},
 		"commands": [
 			{
-				"command": "extension.reset.device",
+				"command": "extension.m5stackv2.reset.device",
 				"title": "Reset M5Stack"
 			},
 			{

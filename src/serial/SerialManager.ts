@@ -45,6 +45,7 @@ class SerialManager {
   }
 
   exec(com: string, code: string): Promise<Buffer> {
+    // TODO
     return this.m5[com].sendCommand(COMMAND_CODES.exec, code);
   }
 
@@ -100,7 +101,8 @@ class SerialManager {
 
   async readFile(com: string, filename: string): Promise<Buffer> {
     try {
-      const cmd = `f = open('${filename}', 'r'); print(f.read()); f.close();`;
+      const cmd = `f = open('${filename}', 'rb'); print(f.read()); f.close();`;
+      console.log(cmd);
       const res = this.arunCmd(com, cmd)
       return res;
     } catch (err) {
@@ -172,7 +174,8 @@ class SerialManager {
   }
 
   removeFile(com: string, filename: string) {
-    return this.m5[com].sendCommand(COMMAND_CODES.removeFile, filename);
+    const cmd = `import os; os.remove(${filename});`;
+    return this.arunCmd(com, cmd);
   }
 
   disconnect(com: string) {
