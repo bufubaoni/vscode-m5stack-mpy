@@ -2,7 +2,7 @@
 	"name": "vscode-m5stack-mpy-uiflow2",
 	"displayName": "vscode-m5stack-mpy-uiflow2.0",
 	"description": "A extension for M5Stack devices with uiflow2.0 use MicroPython and VSCode",
-	"publisher": "alex.chen",
+	"publisher": "Alex-Chen",
 	"license": "MIT",
 	"email": "bufubaoni@163.com",
 	"repository": {
