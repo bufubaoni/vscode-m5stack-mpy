@@ -102,7 +102,7 @@ class SerialManager {
   async readFile(
     com: string,
     filename: string,
-    chunkSize: number = 256
+    chunkSize: number = 512
   ): Promise<Buffer> {
     let offset = 0;
     const chunks: Buffer[] = [];
@@ -110,8 +110,7 @@ class SerialManager {
     try {
       while (true) {
         const cmd = `f=open('${filename}','rb');f.seek(${offset});chunk=f.read(${chunkSize});f.close();print(chunk.hex())`;
-        console.log(`[CMD] Offset=${offset}, Size=${chunkSize}, ${cmd}`);
-
+        console.debug(`[CMD] Offset=${offset}, Size=${chunkSize}, ${cmd}`);
         const rawResponse = (await this.arunCmd(com, cmd)).toString();
         let [sizeStr, hexData] = rawResponse.split(MICRO_INTER_CMD.endCMD, 2);
         hexData = rawResponse.replace(`${sizeStr}${MICRO_INTER_CMD.endCMD}`, "");
@@ -160,7 +159,7 @@ class SerialManager {
     content: string | Buffer,
     isBinary: boolean,
     progressCb: (chunkIndex: number) => void,
-    chunkSize: number = 64
+    chunkSize: number = 512
   ): Promise<Buffer> {
     const data = isBinary ? (content as Buffer) : Buffer.from(content as string);
     const totalChunks = Math.ceil(data.length / chunkSize);
