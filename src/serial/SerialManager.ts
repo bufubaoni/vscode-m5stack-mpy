@@ -192,8 +192,8 @@ class SerialManager {
     }
   }
 
-  removeFile(com: string, filename: string) {
-    const cmd = `import os; os.remove(${filename});`;
+  async removeFile(com: string, filename: string) {
+    const cmd = `import os; os.remove('${filename}');`;
     return this.arunCmd(com, cmd);
   }
 
