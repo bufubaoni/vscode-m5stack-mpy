@@ -6,7 +6,7 @@
 	"license": "MIT",
 	"email": "bufubaoni@163.com",
 	"repository": {
-		"url": "https://github.com/bufubaoni/vscode-m5stack-mpy.git",
+		"url": "https://github.com/bufubaoni/vscode-m5stack-mpy-uiflow2.git",
 		"type": "git"
 	},
 	"keywords": [

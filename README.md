@@ -1,7 +1,7 @@
 # **vscode-m5stack-mpy-uiflow2**
 
 
-# vscode-m5stack-mpy
+# vscode-m5stack-mpy-uiflow2
 
 A extension for M5Stack Micropython system.
 
@@ -11,7 +11,7 @@ A extension for M5Stack Micropython system.
 
 ## Quick Start
 
-- Install vscode-m5stack-mpy.
+- Install vscode-m5stack-mpy-uiflow2.
 - Connection M5Stack Device with USB cable.
 
 ![screenshot](./resources/quick-start-v2-01.jpeg)

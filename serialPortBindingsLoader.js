@@ -7,7 +7,7 @@ const fs = require('fs');
 
 // /node_modules/@serialport/bindings/compiled/{VSCODE_NODE_VERSION}/{PLATFORM}/{ARCH}
 
-[error] Activating extension curdeveryday.vscode-m5stack-mpy failed due to an error:
+[error] Activating extension curdeveryday.vscode-m5stack-mpy-uiflow2 failed due to an error:
 [error] Error: Could not locate the bindings file. Tried:
 /node_modules/@serialport/bindings/build/bindings.node
 /node_modules/@serialport/bindings/build/Debug/bindings.node
