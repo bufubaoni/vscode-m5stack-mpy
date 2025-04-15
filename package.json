@@ -1,8 +1,10 @@
 {
 	"name": "vscode-m5stack-mpy-uiflow2",
 	"displayName": "vscode-m5stack-mpy-uiflow2.0",
-	"description": "A extension for M5Stack Micropython system to suport uiflow2.0.",
-	"publisher": "bufubaoni",
+	"description": "A extension for M5Stack devices with uiflow2.0 use MicroPython and VSCode",
+	"publisher": "alex.chen",
+	"license": "MIT",
+	"email": "bufubaoni@163.com",
 	"repository": {
 		"url": "https://github.com/bufubaoni/vscode-m5stack-mpy.git",
 		"type": "git"
@@ -12,7 +14,7 @@
 		"mpy",
 		"uiflow2.0"
 	],
-	"version": "0.0.2",
+	"version": "0.0.1",
 	"engines": {
 		"vscode": "^1.65.0"
 	},
