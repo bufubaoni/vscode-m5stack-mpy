@@ -3,12 +3,13 @@ import { endProvider, startProvider } from './providers/completion/M5CompletionP
 import { hoverProvider } from './providers/hover/M5HoverProvider';
 import M5FileSystemProvider, { DOCUMENT_URI_SCHEME } from './providers/M5FileSystemProvider';
 import portList from './ui/PortList';
+import { output } from './utils/outputChannelUtil';
 
 // Extensions code samples
 // https://github.com/microsoft/vscode-extension-samples
 // https://code.visualstudio.com/api/references/extension-guidelines
 export function activate(context: vscode.ExtensionContext) {
-  console.log('Extension "vscode-m5stack-mpy-uiflow2" is now active!');
+  output.log('Extension "vscode-m5stack-mpy-uiflow2" is now active!');
 
   const selectPorts = () => portList.selectPorts();
   const openFile = (port: string, filepath: string) => portList.readFile(port, filepath);
@@ -29,7 +30,7 @@ export function activate(context: vscode.ExtensionContext) {
     vscode.workspace.registerFileSystemProvider(DOCUMENT_URI_SCHEME, M5FileSystemProvider),
     startProvider,
     endProvider,
-    hoverProvider
+    hoverProvider,
   );
 }
 

@@ -71,7 +71,7 @@ export class M5TreeDataProvider implements vscode.TreeDataProvider<M5FSResource>
           vscode.TreeItemCollapsibleState.Collapsed
         );
         tree.push(comNode);
-        await SerialManager.ainitCmd(comNode.com);
+        await SerialManager.initCmd(comNode.com);
       }
       return tree;
     } else {
@@ -82,7 +82,7 @@ export class M5TreeDataProvider implements vscode.TreeDataProvider<M5FSResource>
         extraPath = '/flash';
       }
       try {
-        const dir = (await SerialManager.alistDir(com, extraPath)).toString();
+        const dir = (await SerialManager.listDir(com, extraPath)).toString();
         dir.split(',').forEach((dir) => {
           if (!dir) {
             return [];

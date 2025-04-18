@@ -1,7 +1,7 @@
-import { Console } from 'console';
 import SerialConnection from './SerialConnection';
-import { COMMAND_CODES, MICRO_INTER_CMD, SIG } from './types';
+import { MICRO_INTER_CMD, SIG } from './types';
 import vscode from 'vscode';
+import { output } from '../utils/outputChannelUtil';
 
 type Connections = {
   [key: string]: SerialConnection;
@@ -19,66 +19,59 @@ class SerialManager {
     this.m5[com] = new SerialConnection(com, openedCb);
   }
 
-  async ainitCmd(com: string) {
+  async initCmd(com: string) {
     try {
-      console.log("sendCommandWithBuffer:MICRO_INTER_CMD.endCMD:start " + com.toString());
+      const timeout = 3000; // 3 seconds timeout
+      output.log(`Send Hex: ${Buffer.from(MICRO_INTER_CMD.endCMD).toString('hex')}`);
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error(`Command timeout after ${timeout} ms`)), timeout);
+      });
+
+      try {
+        await Promise.race([
+          this.m5[com].sendCommandWithBuffer(Buffer.from(MICRO_INTER_CMD.endCMD)),
+          timeoutPromise
+        ]);
+      } catch (err) {
+        output.log(`[WARN] Timeout Send Hex: ${Buffer.from([MICRO_INTER_CMD.stopCurrent]).toString('hex')}`);
+        this.m5[com].sendCommandWithBuffer(Buffer.from([MICRO_INTER_CMD.stopCurrent]));
+      }
       const res = await this.m5[com].sendCommandWithBuffer(Buffer.from(MICRO_INTER_CMD.endCMD));
-      console.log("sendCommandWithBuffer:MICRO_INTER_CMD.endCMD:end");
-      console.log("sendCommandWithBuffer:MICRO_INTER_CMD.stopCurrent:start" + res.toString());
-      console.log(res.toString());
+      output.log(res.toString());
       if (res.toString() === '') {
-        vscode.window.showInformationMessage('Raw REPL mode is now active.');
+        output.log('Raw REPL mode is now active.');
+        output.log(`Send Hex: ${Buffer.from([MICRO_INTER_CMD.stopCurrent]).toString('hex')}`);
         await this.m5[com].sendCommandWithBuffer(Buffer.from([MICRO_INTER_CMD.stopCurrent]));
       } else if (res.toString().includes(SIG.logo)) {
-        vscode.window.showInformationMessage('Raw REPL mode from log.');
+        output.log('Raw REPL mode from log.');
+        output.log(`Send Hex: ${Buffer.from([MICRO_INTER_CMD.stopCurrent]).toString('hex')}`);
         await this.m5[com].sendCommandWithBuffer(Buffer.from([MICRO_INTER_CMD.stopCurrent]));
       } else if (res.toString().includes(SIG.RawReplStr)) {
-        vscode.window.showInformationMessage('Enter Raw REPL mode directly.');
+        output.log('Enter Raw REPL mode directly.');
       }
       else {
-        vscode.window.showErrorMessage('Failed to enter Raw REPL mode.');
+        output.log('[WARNING] Failed to enter Raw REPL mode.');
       }
-      console.log("init successful.");
+      output.log("init successful.");
     } catch (e) {
       throw new Error("init execution failed");
     }
   }
 
-  exec(com: string, code: string): Promise<Buffer> {
-    // TODO
-    return this.m5[com].sendCommand(COMMAND_CODES.exec, code);
+  async exec(com: string, code: string): Promise<Buffer> {
+    return this.m5[com].sendCommandWithBuffer(Buffer.from(MICRO_INTER_CMD.softRebot.toString(16)));
   }
 
-  listDir(com: string, dirname: string): Promise<Buffer> {
-    this.m5[com].sendCommandWithBuffer(Buffer.from(MICRO_INTER_CMD.setRawRepl.toString(16))).then((res) => {
-      console.log("sendCommandWithBuffer:MICRO_INTER_CMD.setRawRepl:start");
-      console.log(res.toString());
-      console.log("sendCommandWithBuffer:MICRO_INTER_CMD.setRawRepl:end");
-    }).catch((e) => {
-      console.log(e.toString());
-    });;
-    let dir = `import os; files = os.listdir('${dirname}'); print(','.join(files));`
-    console.info(dir);
-    this.m5[com].sendCommandWithBuffer(Buffer.from(dir)).then((res) => {
-      console.log("sendCommandWithBuffer:MICRO_INTER_CMD.dir:start");
-      console.log(res.toString());
-      console.log("sendCommandWithBuffer:MICRO_INTER_CMD.dir:end");
-    }).catch((e) => {
-      console.log(e.toString());
-    });;
-    this.m5[com].sendCommandWithBuffer(Buffer.from(MICRO_INTER_CMD.endCMD));
-    return this.m5[com].sendCommandWithBuffer(Buffer.from(MICRO_INTER_CMD.endCMD));
-  }
-
-  async alistDir(com: string, dirname: string): Promise<Buffer> {
+  async listDir(com: string, dirname: string): Promise<Buffer> {
     try {
       const cmd = `import os; files = os.listdir('${dirname}'); print(','.join(files));`;
+      output.log(">>>" + cmd)
       const res = await this.arunCmd(com, cmd);
-      console.log("end exec cmd result: " + res.toString())
+      output.log(res.toString())
       return res;
     } catch (err) {
       const error = err as Error;
-      console.error('Error occurred:', error.toString());
+      output.log('[ERROR] ' + error.toString());
       throw error;
     }
   }
@@ -110,11 +103,12 @@ class SerialManager {
     try {
       while (true) {
         const cmd = `f=open('${filename}','rb');f.seek(${offset});chunk=f.read(${chunkSize});f.close();print(chunk.hex())`;
-        console.debug(`[CMD] Offset=${offset}, Size=${chunkSize}, ${cmd}`);
+        output.log(`>>> ${cmd}`);
         const rawResponse = (await this.arunCmd(com, cmd)).toString();
         let [sizeStr, hexData] = rawResponse.split(MICRO_INTER_CMD.endCMD, 2);
         hexData = rawResponse.replace(`${sizeStr}${MICRO_INTER_CMD.endCMD}`, "");
         const res = hexData.toString()
+        output.log(`${res}`);
         if (res == "b''") {
           break;
         }
@@ -125,7 +119,7 @@ class SerialManager {
 
       return Buffer.concat(chunks);
     } catch (err) {
-      console.error('Error:', err instanceof Error ? err.message : String(err));
+      output.log('[ERROR] ', err instanceof Error ? err.message : String(err));
       throw err;
     }
   }
@@ -144,7 +138,7 @@ class SerialManager {
       // 单次写入全部数据
       const cmd = `f=open("${filename}","${mode}"); f.write(${JSON.stringify(data.toString('binary'))}); f.close()`;
       const result = await this.arunCmd(com, cmd);
-      console.log(`return: ${result.toString()}`);
+      output.log(`return: ${result.toString()}`);
       return Buffer.from('done');
     } catch (err) {
       const error = err as Error;
@@ -200,7 +194,7 @@ class SerialManager {
     if (this.m5[com]) {
       this.m5[com].close((error?: Error | null) => {
         if (error) {
-          console.log('Error while disconecting', error);
+          output.log('Error while disconecting', error);
         }
         delete this.m5[com];
       });

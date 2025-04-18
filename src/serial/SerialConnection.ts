@@ -3,8 +3,7 @@ import { InterByteTimeoutParser } from '@serialport/parser-inter-byte-timeout';
 import { PortInfo } from '@serialport/bindings-interface';
 import Crc from './Crc';
 import { defaultOpts } from './types';
-
-const comErroMessage = 'Communication error, sorry.';
+import { output } from '../utils/outputChannelUtil';
 
 class SerialConnection {
   private com: string;
@@ -46,7 +45,6 @@ class SerialConnection {
     this.received = Buffer.from([]);
     const self = this;
     return new Promise((resolve, reject) => {
-      console.log('sending bytes', buffer);
       self.resolve = resolve;
       self.reject = reject;
       self.write(buffer);
@@ -60,7 +58,7 @@ class SerialConnection {
       this.port.drain((err) => {
         if (err) {
           this.reject('drain error');
-          console.log('drain error', err);
+          output.log('drain error', err);
         }
       });
     } catch (e) {
@@ -82,13 +80,13 @@ class SerialConnection {
   }
 
   onError(err: any): void {
-    console.log(err);
+    output.log(`[ERROR] ${err}`);
     this.isBusy = false;
   }
 
   onOpen(err: unknown): void {
     if (!err) {
-      console.log(`opened connection on ${this.com}`);
+      output.log(`Opened connection on ${this.com}`);
       this.onOpenCb(err);
     }
   }

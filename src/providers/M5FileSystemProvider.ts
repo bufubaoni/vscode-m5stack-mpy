@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import SerialManager, { MAX_CHUNK_LENGTH } from '../serial/SerialManager';
 import { getSerialPortAndFileFromUri } from '../utils/vscode';
+import { output } from '../utils/outputChannelUtil';
 
 export const DOCUMENT_URI_SCHEME = 'm5stackfs';
 
@@ -19,7 +20,7 @@ class M5FileSystemProvider implements vscode.FileSystemProvider {
 
   watch(): vscode.Disposable {
     // ignore, fires for all changes...
-    return new vscode.Disposable(() => {});
+    return new vscode.Disposable(() => { });
   }
 
   stat(uri: vscode.Uri): vscode.FileStat {
@@ -31,7 +32,7 @@ class M5FileSystemProvider implements vscode.FileSystemProvider {
     };
   }
 
-  createDirectory(uri: vscode.Uri): void {}
+  createDirectory(uri: vscode.Uri): void { }
 
   readDirectory(uri: vscode.Uri): [string, vscode.FileType][] {
     return [];
@@ -46,16 +47,18 @@ class M5FileSystemProvider implements vscode.FileSystemProvider {
       const { port, filepath } = getSerialPortAndFileFromUri(uri, this.platform);
       const text = (await SerialManager.readFile(port, filepath)).toString();
       if (text === undefined) {
-        vscode.window.showErrorMessage(`Open ${filepath} failed.`);
+        const msg = `Open ${filepath} failed.`
+        vscode.window.showErrorMessage(msg);
+        output.log(msg);
         return;
       }
       this.files[uri.path] = Buffer.from(text);
     }
   }
 
-  rename(oldUri: vscode.Uri, newUri: vscode.Uri, options: { overwrite: boolean }): void {}
+  rename(oldUri: vscode.Uri, newUri: vscode.Uri, options: { overwrite: boolean }): void { }
 
-  delete(uri: vscode.Uri): void {}
+  delete(uri: vscode.Uri): void { }
 
   async saveFile(uri: vscode.Uri, text: string): Promise<number> {
     try {
@@ -86,7 +89,7 @@ class M5FileSystemProvider implements vscode.FileSystemProvider {
         }
       );
     } catch (e: any) {
-      console.log('Error while saving', e.toString());
+      output.log('[ERROR] Error while saving', e.toString());
       return 0;
     }
   }

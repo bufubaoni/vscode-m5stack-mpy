@@ -1,8 +1,5 @@
 import * as vscode from 'vscode';
 import { COM, FILE, FOLDER, M5FSResource, M5TreeDataProvider } from './TreeDataProvider';
-jest.mock('../serial/SerialManager', () => ({
-  listDir: () => Promise.resolve(['file1.py', 'directory']),
-}));
 
 describe('TreeDataProvider', () => {
   describe('M5FSResource', () => {

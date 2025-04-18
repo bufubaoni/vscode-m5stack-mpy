@@ -9,6 +9,7 @@ import { getSerialPortAndFileFromUri } from '../utils/vscode';
 import FileTree from './FileTree';
 import StatusBar from './StatusBar';
 import { PickedItem } from './types';
+import { output } from '../utils/outputChannelUtil';
 
 type ResourceMapCache = {
   [key: string]: string;
@@ -150,15 +151,11 @@ class PortList {
       let base64Image = this.resourceCache[filepath];
       if (!base64Image) {
         const img = await SerialManager.readFile(port, filepath);
-        console.log('====read img start====');
-        console.log(img);
-        console.log('====read img end====');
         base64Image = img.toString('base64');
         this.resourceCache[filepath] = base64Image;
       }
 
       panel.webview.html = `<img src="data:image/${fileExtension};base64,${base64Image}" />`;
-      console.log(panel.webview.html);
       return;
     }
     if (!supportedTextFileTypes.includes(fileExtension)) {
@@ -173,7 +170,7 @@ class PortList {
       let doc = await vscode.workspace.openTextDocument(uri);
       await vscode.window.showTextDocument(doc, { preview: false });
     } else {
-      console.log('Device is busy, wait a bit');
+      output.log('[ERROR] Device is busy, wait a bit');
     }
   }
 
@@ -187,7 +184,6 @@ class PortList {
       const args = uri.path.split('/');
       const port = process.platform === 'win32' ? args[1] : `/dev/${args[1]}`;
       const r = await SerialManager.exec(port, 'machine.reset()');
-
       if (r?.toString().indexOf('done') < 0) {
         vscode.window.showErrorMessage('Reset device failed.');
       } else {
@@ -263,8 +259,9 @@ class PortList {
         }
       );
     } catch (e: any) {
-      console.log('Error while uploading', e.toString());
-      vscode.window.showErrorMessage(`Upload failed.`);
+      const msg = `[ERROR] Uploading: '${filename}.'`;
+      output.log(msg);
+      vscode.window.showErrorMessage(msg);
     }
   }
 
@@ -273,7 +270,7 @@ class PortList {
       const document = vscode.window.activeTextEditor.document;
       const uri = document.uri;
       const text = trimComments(document.getText());
-      console.log('executing following code', text);
+      output.log('executing following code', text);
       const { port } = getSerialPortAndFileFromUri(uri, process.platform);
       const r = await SerialManager.exec(port, text);
       if (r?.toString().indexOf('done') < 0) {
