@@ -8,11 +8,13 @@ export const MICRO_INTER_CMD = {
   stopCurrent: 0x03,
   softRebot: 0x04,
   passMode: 0x05,
+  CtrD: 0x04,
   endCMD: '\r\n',
   endFile: '\r\nb\'\''
 }
 
 export const SIG = {
   logo: "\\__,_|_|_| |_|\\___/ \\_/\\_/",
-  RawReplStr: ">>>"
+  RawReplStr: ">>>",
+  PasteModeStr: "==="
 }

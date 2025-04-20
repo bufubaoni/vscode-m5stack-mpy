@@ -5,7 +5,6 @@ import M5FileSystemProvider, { DOCUMENT_URI_SCHEME } from '../providers/M5FileSy
 import SerialConnection from '../serial/SerialConnection';
 import SerialManager, { MAX_CHUNK_LENGTH } from '../serial/SerialManager';
 import { trimComments } from '../utils/text';
-import { getSerialPortAndFileFromUri } from '../utils/vscode';
 import FileTree from './FileTree';
 import StatusBar from './StatusBar';
 import { PickedItem } from './types';
@@ -265,19 +264,22 @@ class PortList {
     }
   }
 
-  async run() {
+  async run(ev: any) {
+    let _ev = Object.assign({}, ev);
+    if (ev.path !== undefined) {
+      let args = ev.path.split('/');
+      let port = process.platform === 'win32' ? args[1] : `/dev/${args[1]}`;
+      _ev.com = port;
+      _ev.label = args[args.length - 1];
+      _ev.parent = `/${args.slice(2, args.length - 1).join('/')}`;
+    }
     if (vscode.window.activeTextEditor) {
       const document = vscode.window.activeTextEditor.document;
-      const uri = document.uri;
       const text = trimComments(document.getText());
-      output.log('executing following code', text);
-      const { port } = getSerialPortAndFileFromUri(uri, process.platform);
-      const r = await SerialManager.exec(port, text);
-      if (r?.toString().indexOf('done') < 0) {
-        vscode.window.showErrorMessage('Run failed.');
-      } else {
-        vscode.window.showInformationMessage('Run successfully.');
-      }
+      console.log(_ev.com)
+      const resp = await SerialManager.run(_ev.com, text);
+
+      output.log(`End of run file with: ${resp}`)
     }
   }
 

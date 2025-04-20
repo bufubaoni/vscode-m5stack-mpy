@@ -18,6 +18,7 @@ export function activate(context: vscode.ExtensionContext) {
   const removeFile = (ev: any) => portList.remove(ev);
   const uploadFile = (ev: any) => portList.upload(ev);
   const resetDevice = (ev: any) => portList.reset();
+  const runFile = (ev: any) => portList.run(ev);
 
   context.subscriptions.push(
     vscode.commands.registerCommand('vscode-m5stackv2-mpyreader.selectPorts', selectPorts, context),
@@ -27,6 +28,7 @@ export function activate(context: vscode.ExtensionContext) {
     vscode.commands.registerCommand('m5stackv2.addEntry', createFile, context),
     vscode.commands.registerCommand('m5stackv2.deleteEntry', removeFile, context),
     vscode.commands.registerCommand('m5stackv2.itemUpload', uploadFile, context),
+    vscode.commands.registerCommand('m5stackv2.itemRun', runFile, context),
     vscode.workspace.registerFileSystemProvider(DOCUMENT_URI_SCHEME, M5FileSystemProvider),
     startProvider,
     endProvider,

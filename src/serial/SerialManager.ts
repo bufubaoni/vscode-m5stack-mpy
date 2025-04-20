@@ -48,6 +48,11 @@ class SerialManager {
         await this.m5[com].sendCommandWithBuffer(Buffer.from([MICRO_INTER_CMD.stopCurrent]));
       } else if (res.toString().includes(SIG.RawReplStr)) {
         output.log('Enter Raw REPL mode directly.');
+      } else if (res.toString().includes(SIG.PasteModeStr)) {
+        output.log('Enter Raw REPL mode from paste mode.');
+        output.log(`Send Hex: ${Buffer.from([MICRO_INTER_CMD.stopCurrent]).toString('hex')}`);
+        const res3 = await this.m5[com].sendCommandWithBuffer(Buffer.from([MICRO_INTER_CMD.stopCurrent]));
+        output.log(`resp: ${res3.toString()}`);
       }
       else {
         output.log('[WARNING] Failed to enter Raw REPL mode.');
@@ -132,7 +137,7 @@ class SerialManager {
     isBinary?: boolean
   ): Promise<Buffer> {
     const data = isBinary ? (content as Buffer) : Buffer.from(content as string);
-    const mode = flag === 0x01 ? 'wb' : 'ab'; // 根据标志决定写入模式
+    const mode = flag === 0x01 ? 'wb' : 'ab';
 
     try {
       // 单次写入全部数据
@@ -142,7 +147,7 @@ class SerialManager {
       return Buffer.from('done');
     } catch (err) {
       const error = err as Error;
-      vscode.window.showErrorMessage(`Failed to save ${filename}: ${error.message}`);
+      output.log(`[ERROR] Failed to save ${filename}: ${error.message}`);
       return Promise.reject(Buffer.from(error.message));
     }
   }
@@ -159,14 +164,13 @@ class SerialManager {
     const totalChunks = Math.ceil(data.length / chunkSize);
 
     try {
-      // 第一片用覆盖模式，后续用追加模式
       for (let i = 0; i < totalChunks; i++) {
         const chunk = data.slice(i * chunkSize, (i + 1) * chunkSize);
         const result = await this.download(
           com,
           filename,
           chunk,
-          i === 0 ? 0x01 : 0x00, // 首片覆盖，后续追加
+          i === 0 ? 0x01 : 0x00,
           isBinary
         );
 
@@ -174,13 +178,13 @@ class SerialManager {
           throw new Error(`Chunk ${i} failed: ${result.toString()}`);
         }
 
-        progressCb(i + 1); // 报告进度
+        progressCb(i + 1);
       }
 
       return Buffer.from('done');
     } catch (err) {
       const error = err as Error;
-      vscode.window.showErrorMessage(`Bulk download failed at chunk: ${error.message}`);
+      output.log(`[ERROR] Bulk download failed at chunk: ${error.message}`);
       return Promise.reject(Buffer.from(error.message));
     }
   }
@@ -188,6 +192,31 @@ class SerialManager {
   async removeFile(com: string, filename: string) {
     const cmd = `import os; os.remove('${filename}');`;
     return this.arunCmd(com, cmd);
+  }
+
+  async run(com: string, data: string) {
+    const runcl = "import gc; gc.collect()";
+    await this.m5[com].sendCommandWithBuffer(Buffer.from(runcl));
+    const res1 = await this.m5[com].sendCommandWithBuffer(Buffer.from(MICRO_INTER_CMD.endCMD));
+    output.log(`Collect gc: ${res1}`)
+    output.log("Set past model init.");
+    const res = await this.m5[com].sendCommandWithBuffer(Buffer.from([MICRO_INTER_CMD.passMode]));
+    output.log("Set past model successful: " + res.toString())
+    const lines = data.split('\n');
+    output.log(`[${com}] ready to send ${lines.length} lines`);
+
+    for (let index = 0; index < lines.length; index++) {
+      const line = lines[index];
+      if (line.trim() === '') continue;
+      try {
+        await this.m5[com].sendCommandWithBuffer(Buffer.from(line + MICRO_INTER_CMD.endCMD));
+        output.log(`===${line}`)
+      } catch (lineError) {
+        output.log(`[${com}] line ${index + 1} failed: ${lineError}`);
+        throw new Error(`line ${index + 1} failed: ${lineError}`);
+      }
+    }
+    return this.m5[com].sendCommandWithBuffer(Buffer.from([MICRO_INTER_CMD.CtrD]));
   }
 
   disconnect(com: string) {

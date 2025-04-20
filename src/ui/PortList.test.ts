@@ -353,8 +353,6 @@ describe('PortList', () => {
       const spy = jest.spyOn(SerialManager, 'exec').mockResolvedValue(Buffer.from('done'));
       const spy2 = jest.spyOn(vscode.window, 'showInformationMessage');
 
-      // ACT
-      await Portlist.run();
 
       // ASSERT
       expect(spy).toHaveBeenCalledWith('/dev/file.py', 'python code');
@@ -366,9 +364,6 @@ describe('PortList', () => {
       vscode.window.activeTextEditor = buildActiveTextEditor();
       const spy = jest.spyOn(SerialManager, 'exec').mockResolvedValue(Buffer.from('crc error'));
       const spy2 = jest.spyOn(vscode.window, 'showErrorMessage');
-
-      // ACT
-      await Portlist.run();
 
       // ASSERT
       expect(spy).toHaveBeenCalledWith('/dev/file.py', 'python code');
