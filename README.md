@@ -30,16 +30,17 @@ A extension for M5Stack Micropython system.
 ![screenshot](./resources/image_5.png)
 - Save file. You can press `ctrl + s` or click `File->Save` to save file.
 
+- Run code a file.
+
+![screenshot](./resources/image_6.png)
+- Click the run icon to run the file (the cursor must be on the file that will be run).
+
 ## TBD
 - Auto Completion of Units and Modules.
 - Display tips when hover on it.
 - Syntax-highlighting
 - Auto Completion
 - Debugging
-- Delete files in M5Stack Device
-- Execute command in M5Stack Device
-- Recovery running status of M5Stack Device
-
 
 ## Contributions
 
