@@ -40,7 +40,7 @@ class SerialConnection {
     this.received = Buffer.from([]);
     const self = this;
     return new Promise((resolve, reject) => {
-      self.resolve = resolve;
+      self.resolve = (value: Buffer) => resolve(value);;
       self.reject = reject;
       self.write(buffer);
     });
