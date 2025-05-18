@@ -1,7 +1,6 @@
 import { SerialPort } from 'serialport';
 import { InterByteTimeoutParser } from '@serialport/parser-inter-byte-timeout';
 import { PortInfo } from '@serialport/bindings-interface';
-import Crc from './Crc';
 import { defaultOpts } from './types';
 import { output } from '../utils/outputChannelUtil';
 
@@ -35,10 +34,6 @@ class SerialConnection {
 
   get busy(): boolean {
     return this.isBusy;
-  }
-
-  sendCommand(code: number, data: string): Promise<Buffer> {
-    return this.sendCommandWithBuffer(Crc.createDataBuffer(code, data));
   }
 
   sendCommandWithBuffer(buffer: Buffer): Promise<Buffer> {

@@ -1,4 +1,3 @@
-import Crc from './Crc';
 import SerialConnection from './SerialConnection';
 
 jest.mock('../serial/SerialManager', () => ({
@@ -11,10 +10,6 @@ jest.mock('../serial/SerialManager', () => ({
   removeFile: jest.fn(),
 }));
 
-jest.mock('./Crc', () => ({
-  checkReceiveCompleted: jest.fn(),
-  coverCrc: jest.fn(),
-}));
 
 describe('SerialConnection', () => {
   beforeEach(() => {
@@ -24,7 +19,7 @@ describe('SerialConnection', () => {
   describe('send', () => {
     test('should handle sending command as buffer', async () => {
       // ARRANGE
-      const conn = new SerialConnection('/dev/device', () => {});
+      const conn = new SerialConnection('/dev/device', () => { });
       const spy = jest.spyOn(conn, 'write');
 
       setTimeout(() => {
@@ -42,7 +37,7 @@ describe('SerialConnection', () => {
   describe('write', () => {
     test('should handle writing to device', async () => {
       // ARRANGE
-      const conn = new SerialConnection('/dev/device', () => {});
+      const conn = new SerialConnection('/dev/device', () => { });
       const spyWrite = jest.spyOn(conn.port, 'write');
       const spyDrain = jest.spyOn(conn.port, 'drain');
 
@@ -58,28 +53,24 @@ describe('SerialConnection', () => {
   describe('onData', () => {
     test('should handle receiving data', async () => {
       // ARRANGE
-      const conn = new SerialConnection('/dev/device', () => {});
-      const spyCrc = jest.spyOn(Crc, 'checkReceiveCompleted').mockImplementationOnce(() => true);
+      const conn = new SerialConnection('/dev/device', () => { });
       const spyResolve = jest.spyOn(conn, 'resolve');
 
       // ACT
       await conn.onData(Buffer.from([0x01, 0x02, 0x03, 0x04, 0x00]));
 
       // ASSERT
-      expect(spyCrc).toHaveBeenCalledTimes(1);
       expect(spyResolve).toHaveBeenCalledTimes(1);
     });
     test('should handle errors on receiving data', async () => {
       // ARRANGE
-      const conn = new SerialConnection('/dev/device', () => {});
-      const spyCrc = jest.spyOn(Crc, 'checkReceiveCompleted').mockImplementationOnce(() => true);
+      const conn = new SerialConnection('/dev/device', () => { });
       const spyReject = jest.spyOn(conn, 'reject');
 
       // ACT
       await conn.onData(Buffer.from([0x01, 0x02, 0x03, 0x04, 0x05]));
 
       // ASSERT
-      expect(spyCrc).toHaveBeenCalledTimes(1);
       expect(spyReject).toHaveBeenCalledTimes(1);
     });
   });
